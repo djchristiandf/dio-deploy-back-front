@@ -10,8 +10,7 @@ spec:
       storage: 10Gi
   storageClassName: standard-rwo        
 
-
-----
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,9 +25,9 @@ spec:
         app: mysql    
     spec:
       containers:
-      - image: djchristiandf/projeto-batabase:1.0
+      - image: djchristiandf/projeto-database:1.0
         args:
-        - "--ignore-db-dir-lost+found"
+        - "--ignore-db-dir=lost+found"
         imagePullPolicy: Always
         name: mysql
         ports:
@@ -37,8 +36,11 @@ spec:
 
         volumeMounts:
         - name: mysql-dados
-          PersistentVolumeClaim:
-            claimName: mysql-dados
+          mountPath: /var/lib/mysql/
+      volumes:
+      - name: mysql-dados    
+        persistentVolumeClaim:
+          claimName: mysql-dados
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,20 +48,19 @@ metadata:
   name: php
   labels:
     app: php
-spec:
+spec: 
   replicas: 6
   selector:
     matchLabels:
       app: php
-    template:
-      metadata:
-        labels:
-          app: php
-      spec:
-        containers:
-        - name: php
-          image: djchristiandf/projeto-backend:1.0
-          imagePullPolicy: Always
-          ports:
-          - containerPort: 80                        
-  
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+      - name: php
+        image: djchristiandf/projeto-backend:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
